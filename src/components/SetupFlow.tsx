@@ -173,7 +173,7 @@ export function SetupFlow({ onComplete }: { onComplete: (profile: UserProfile, r
         isConnected === null ? 'text-slate-400' :
         isConnected ? 'text-emerald-500' : 'text-rose-500'
       }`}>
-        {isConnected === null ? 'Checking...' : isConnected ? 'Cloud Sync On' : 'Offline'}
+        {profile ? 'Ready to Play' : 'Setting up...'}
       </span>
     </div>
   );
@@ -425,7 +425,7 @@ export function SetupFlow({ onComplete }: { onComplete: (profile: UserProfile, r
           <div className="flex items-center gap-2 mt-1">
             <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`} />
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              {isConnected ? 'Global Sync Active' : 'Sync Offline'}
+              {room ? 'Room Active' : 'Direct Link Ready'}
             </span>
           </div>
         </div>
