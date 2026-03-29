@@ -27,7 +27,7 @@ const PROFILE_KEY = 'dad-word-game-profile';
 // PUBLIC DISCOVERY HUB - Used to share codes globally across phones
 // This Bin ID is shared by everyone playing your specific build
 // Using a public, no-auth testing relay
-const API_URL = `https://api.jsonbin.io/v3/b/65f9d7ce3033462f9dbb87b9`;
+const API_URL = `https://api.jsonbin.io/v3/b/aa324074b886779dfa73`;
 
 export const mockFirebase = {
   getProfile: () => {
@@ -68,7 +68,7 @@ export const mockFirebase = {
     localStorage.setItem('dad-game-fallback', JSON.stringify(rooms));
     try {
       await fetch(API_URL, {
-        method: 'POST', // NPoint uses POST to update contents
+        method: 'POST', // NPoint uses POST to overwrite the bin content
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(rooms)
       });
@@ -128,9 +128,23 @@ export const mockFirebase = {
       await mockFirebase._updateSyncState(rooms);
     }
   },
-
-  getRoom: async (code: string) => {
-    const rooms = await mockFirebase._getSyncState();
-    return rooms[code] || null;
-  }
+  // --- FIXED getRoom to use Cloud Sync ---
+  getRoom: async (code: string): Promise<RoomInfo | null> => {
+    try {
+      // Always fetch fresh state from the cloud hub instead of local storage
+      const rooms = await mockFirebase._getSyncState();
+      const room = rooms[code];
+      
+      if (room) {
+        // Optional: Check if the room has expired (e.g., older than 2 hours)
+        const isExpired = room.lastUpdate && (Date.now() - room.lastUpdate > 7200000);
+        if (isExpired) return null;
+        return room;
+      }
+      return null;
+    } catch (e) {
+      console.error("[SYNC]: Failed to fetch room from cloud", e);
+      return null;
+    }
+  },
 };
