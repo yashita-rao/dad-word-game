@@ -1,5 +1,7 @@
-// @ts-ignore
-const Peer = window.Peer; // This looks at the script we added to index.html
+// @ts-nocheck
+
+// We use "window" to find Peer because we added the script to index.html
+const getPeer = () => (window as any).Peer;
 
 export const mockFirebase = {
   getProfile: () => {
@@ -14,14 +16,17 @@ export const mockFirebase = {
   updateDiamonds: (amount: number) => {
     const profile = mockFirebase.getProfile();
     if (!profile) return 0;
-    profile.diamonds = (profile.diamonds || 0) + amount;
+    const current = profile.diamonds || 0;
+    profile.diamonds = current + amount;
     mockFirebase.saveProfile(profile);
     return profile.diamonds;
   },
 
   initConnection: (onDataReceived: (data: any) => void): Promise<string> => {
-    // @ts-ignore
-    const peer = new Peer(); 
+    const PClass = getPeer();
+    if (!PClass) return Promise.reject("PeerJS not loaded yet");
+    
+    const peer = new PClass();
     return new Promise((resolve) => {
       peer.on('open', (id: string) => resolve(id));
       peer.on('connection', (conn: any) => {
@@ -31,8 +36,10 @@ export const mockFirebase = {
   },
 
   joinRoom: (code: string, onDataReceived: (data: any) => void) => {
-    // @ts-ignore
-    const peer = new Peer();
+    const PClass = getPeer();
+    if (!PClass) return;
+    
+    const peer = new PClass();
     peer.on('open', () => {
       const conn = peer.connect(code);
       conn.on('open', () => {
@@ -42,7 +49,6 @@ export const mockFirebase = {
   },
 
   sendUpdate: (data: any) => {
-    // Note: In this simple version, we'll focus on getting the game board to show up first.
-    console.log("Sending update:", data);
+    console.log("Sync data:", data);
   }
 };
