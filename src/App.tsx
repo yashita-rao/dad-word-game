@@ -174,7 +174,7 @@ function App() {
                 const totalWords = grid.placedWords?.length || 0;
                 if (myProgress < totalWords) {
                     showToast('Opponent Won! 🏆');
-                    setTimeout(() => { setGrid(null); }, 2500);
+                    setTimeout(() => { setGrid(null); }, 5000);
                 }
             }
             setIsSyncing(false);
