@@ -26,7 +26,7 @@ const PROFILE_KEY = 'dad-word-game-profile';
 
 // PUBLIC DISCOVERY HUB - Used to share codes globally across phones
 // This Bin ID is shared by everyone playing your specific build
-const DIRECTORY_BIN_ID = '93e15f401f78ab48895b'; // A public discovery bin for cross-phone play
+const DIRECTORY_BIN_ID = 'b2ab09280b4fda6247ff'; // A public discovery bin for cross-phone play
 const API_URL = `https://api.npoint.io/${DIRECTORY_BIN_ID}`;
 
 export const mockFirebase = {
