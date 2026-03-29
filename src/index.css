@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark-bg: #f8fafc;
+  --color-tile-bg: #4f46e5;
+  --color-tile-shadow: #3730A3;
+  --color-tile-text: #ffffff;
+}
+
+body {
+  background-color: var(--color-dark-bg);
+  color: #334155;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.ghost-tile {
+  background-color: var(--color-tile-bg);
+  color: var(--color-tile-text);
+  box-shadow: 0 4px 0 var(--color-tile-shadow), 0 5px 5px rgba(0,0,0,0.4);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.ghost-tile.empty {
+  display: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px) rotate(-5deg); }
+    50% { transform: translateX(5px) rotate(5deg); }
+    75% { transform: translateX(-5px) rotate(-5deg); }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes pop3D {
+  0% { transform: scale(1) translate3d(0, 0, 0); box-shadow: 0 4px 0 #cbd5e1, 0 8px 15px rgba(0,0,0,0.1); background-color: #f1f5f9; color: transparent; }
+  50% { transform: scale(1.15) translate3d(0, -6px, 10px); box-shadow: 0 12px 0 #312E81, 0 20px 30px rgba(0,0,0,0.3); background-color: #6366f1; color: #fff; }
+  100% { transform: scale(1) translate3d(0, -4px, 5px); box-shadow: 0 8px 0 #312E81, 0 15px 25px rgba(0,0,0,0.25); background-color: #4f46e5; color: #fff; }
+}
+
+.animate-pop3D {
+  animation: pop3D 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+  will-change: transform, box-shadow, background-color, color;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out forwards;
+}
+
+@keyframes flyToCounter {
+  0% { transform: translate(var(--startX), var(--startY)) scale(1); opacity: 1; }
+  50% { transform: translate(calc((var(--startX) + var(--endX))/2), calc((var(--startY) + var(--endY))/2 - 50px)) scale(2); opacity: 1; }
+  100% { transform: translate(var(--endX), var(--endY)) scale(0.5); opacity: 0; }
+}
+
+.animate-flyToCounter {
+  animation: flyToCounter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
