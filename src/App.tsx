@@ -174,7 +174,7 @@ function App() {
                 const totalWords = grid.placedWords?.length || 0;
                 if (myProgress < totalWords) {
                     showToast('Opponent Won! 🏆');
-                    setTimeout(() => { setGrid(null); }, 5000);
+                    setTimeout(() => { setGrid(null); }, 2500);
                 }
             }
             setIsSyncing(false);
@@ -182,7 +182,7 @@ function App() {
             setIsSyncing(false);
             setSyncError(true);
         }
-    }, 2000); 
+    }, 5000); 
     return () => clearInterval(interval);
   }, [room?.code, grid ? true : false, foundWords.length, profile?.diamonds, profile?.id]);
 
