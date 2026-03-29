@@ -117,8 +117,31 @@ function App() {
     );
   }
 
-  if (!grid) return <div className="h-screen flex items-center justify-center bg-slate-900 text-white font-bold">Connecting to Peer...</div>;
+// This screen shows up while waiting for the phones to link
+  if (!grid && profile) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-slate-900 text-white p-6 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 mb-4"></div>
+        <h2 className="text-xl font-bold mb-2">Waiting for Connection...</h2>
+        
+        {/* If you are the Host, show the ID so you can give it to the Guest */}
+        {room?.hostId === profile.id && (
+          <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 max-w-xs shadow-2xl">
+            <p className="text-xs text-slate-400 uppercase tracking-widest mb-2 font-bold">Share this ID with Guest</p>
+            <div className="bg-black p-3 rounded lg mb-2 select-all">
+               <code className="text-pink-400 font-mono text-sm break-all">{room.code}</code>
+            </div>
+            <p className="text-[10px] text-slate-500 italic">The guest must enter this exactly to join.</p>
+          </div>
+        )}
 
+        {/* If you are the Guest, you'll see this while the Host generates the grid */}
+        {room?.hostId !== profile.id && (
+          <p className="text-slate-400 animate-pulse">Linking to Host's game...</p>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="h-screen w-screen bg-slate-50 flex flex-col items-center justify-center touch-none">
       {/* Simple Crossword Grid */}
