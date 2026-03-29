@@ -34,6 +34,7 @@ function App() {
     }
   }, [profile]);
 
+// 1. If no profile, show the Name/Avatar setup
   if (!profile) {
     return <SetupFlow onComplete={(p, r) => {
       setProfile(p);
@@ -41,7 +42,8 @@ function App() {
     }} />;
   }
 
-  // 2. THIS IS THE HOST VIEW (The part that was empty)
+  // 2. If we have a profile but NO GRID yet, show the Lobby (ID screen)
+  // This is what you were seeing. We add "!grid" so it disappears once the game starts.
   if (room && !grid) {
     return (
       <div className="h-screen w-screen bg-slate-50 flex flex-col items-center justify-center p-6">
@@ -50,23 +52,24 @@ function App() {
           
           <div className="w-full bg-slate-100 p-4 rounded-xl border-2 border-dashed border-slate-300">
             <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Your Device ID</p>
-            <p className="font-mono text-sm break-all font-black text-slate-700 select-all">
+            <p className="font-mono text-sm break-all font-black text-slate-700">
               {myPeerId || 'Generating ID...'}
             </p>
           </div>
 
-          <p className="text-center text-sm text-slate-500 font-medium">
-            Share this ID with your friend so they can join your session.
-          </p>
-
           <button 
             onClick={() => {
               const newGrid = generateGrid();
-              setGrid(newGrid);
+              setGrid(newGrid); // This will now trigger the game view below
               const wl = newGrid.wheelLetters.map((char, i) => ({ id: `w-${i}-${char}`, char }));
               setWheelLetters(wl);
+              
+              // Send the grid to Dad's phone
+              if (room.conn) {
+                room.conn.send({ type: 'START_GAME', grid: newGrid });
+              }
             }}
-            className="w-full py-4 bg-indigo-600 text-white font-black rounded-xl shadow-[0_4px_0_#3730A3]"
+            className="w-full py-4 bg-indigo-600 text-white font-black rounded-xl shadow-[0_4px_0_#3730A3] active:translate-y-1 active:shadow-none transition-all"
           >
             START GAME
           </button>
@@ -75,13 +78,15 @@ function App() {
     );
   }
 
+  // 3. THE GAME BOARD (This will now show for both you and your dad)
   return (
-    <div className="h-screen w-screen flex flex-col items-center justify-center">
-      <h1 className="text-xl font-bold">Game Started!</h1>
-      {/* Your game board code goes here */}
+    <div className="h-screen w-screen bg-[#f8fafc] flex flex-col items-center justify-center overflow-hidden touch-none">
+       {/* Put your existing Game Board UI code here (the grid, the wheel, etc.) */}
+       <div className="text-indigo-600 font-bold mb-4">Room: {room?.id || 'Connected'}</div>
+       
+       {/* ... rest of your game rendering ... */}
     </div>
   );
 }
 
 export default App;
-
