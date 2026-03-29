@@ -8,66 +8,80 @@ function App() {
   const [profile, setProfile] = useState(null);
   const [room, setRoom] = useState(null);
   const [grid, setGrid] = useState(null);
-  const [foundWords, setFoundWords] = useState([]);
+  const [myPeerId, setMyPeerId] = useState('');
   const [wheelLetters, setWheelLetters] = useState([]);
-  const [activePath, setActivePath] = useState([]);
-  const [isPointerDown, setIsPointerDown] = useState(false);
-  const [pointerPos, setPointerPos] = useState(null);
+  const [foundWords, setFoundWords] = useState([]);
 
-  const letterRefs = useRef({});
-  const wheelContainerRef = useRef(null);
-
-  // peerjs is now loaded via index.html script tag
-  // We access it via window.Peer
-
-  const handlePeerData = (data) => {
-    if (data.type === 'START_GAME') {
-      setGrid(data.grid);
-      setFoundWords([]);
-      const wl = data.grid.wheelLetters.map((char, i) => ({
-        id: `w-${i}-${char}`, char
-      }));
-      setWheelLetters(wl);
-    }
-    if (data.type === 'WORD_FOUND') {
-      setFoundWords(prev => [...new Set([...prev, data.word])]);
-    }
-  };
-
-  const initLevel = (currentRoom, p) => {
-    const activeProf = p || profile;
-    if (!activeProf || !currentRoom) return;
-
-    if (currentRoom.isHost) {
-      const newGrid = generateGrid();
-      setGrid(newGrid);
-      setFoundWords([]);
-      const wl = newGrid.wheelLetters.map((char, i) => ({
-        id: `w-${i}-${char}`, char
-      }));
-      setWheelLetters(wl);
+  // 1. Initialize PeerJS when someone chooses to Host or Join
+  useEffect(() => {
+    if (profile && !myPeerId) {
+      const peer = new window.Peer(); // Accessing from index.html script
       
-      if (currentRoom.conn) {
-        currentRoom.conn.send({ type: 'START_GAME', grid: newGrid });
-      }
-    }
-  };
+      peer.on('open', (id) => {
+        setMyPeerId(id);
+        console.log("My Peer ID is: ", id);
+      });
 
-  // Remove the useEffect that was forcing isOffline = true
-  
+      peer.on('connection', (conn) => {
+        conn.on('data', (data) => {
+          if (data.type === 'GUESS') {
+            // Handle player 2's guesses here
+          }
+        });
+        // Save connection to room state
+        setRoom(prev => ({ ...prev, conn }));
+      });
+    }
+  }, [profile]);
+
   if (!profile) {
     return <SetupFlow onComplete={(p, r) => {
       setProfile(p);
       setRoom(r);
-      if (r.conn) {
-        r.conn.on('data', handlePeerData);
-      }
-      initLevel(r, p);
     }} />;
   }
 
-  // Rest of your game logic (handlePointerDown, etc.) remains here...
-  // [I have truncated for brevity, but keep your existing game movement functions below this line]
+  // 2. THIS IS THE HOST VIEW (The part that was empty)
+  if (room && !grid) {
+    return (
+      <div className="h-screen w-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+        <div className="bg-white p-8 rounded-3xl shadow-xl border-4 border-indigo-100 flex flex-col items-center gap-6 max-w-sm w-full">
+          <h2 className="text-2xl font-black text-indigo-600 uppercase tracking-tighter">Lobby Active</h2>
+          
+          <div className="w-full bg-slate-100 p-4 rounded-xl border-2 border-dashed border-slate-300">
+            <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Your Device ID</p>
+            <p className="font-mono text-sm break-all font-black text-slate-700 select-all">
+              {myPeerId || 'Generating ID...'}
+            </p>
+          </div>
+
+          <p className="text-center text-sm text-slate-500 font-medium">
+            Share this ID with your friend so they can join your session.
+          </p>
+
+          <button 
+            onClick={() => {
+              const newGrid = generateGrid();
+              setGrid(newGrid);
+              const wl = newGrid.wheelLetters.map((char, i) => ({ id: `w-${i}-${char}`, char }));
+              setWheelLetters(wl);
+            }}
+            className="w-full py-4 bg-indigo-600 text-white font-black rounded-xl shadow-[0_4px_0_#3730A3]"
+          >
+            START GAME
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="h-screen w-screen flex flex-col items-center justify-center">
+      <h1 className="text-xl font-bold">Game Started!</h1>
+      {/* Your game board code goes here */}
+    </div>
+  );
 }
 
 export default App;
+
