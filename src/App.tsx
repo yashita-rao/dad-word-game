@@ -12,6 +12,56 @@ function App() {
   const [wheelLetters, setWheelLetters] = useState([]);
   const [foundWords, setFoundWords] = useState([]);
 
+  // @ts-nocheck
+import React, { useEffect, useState, useRef } from 'react';
+// ... other imports
+
+function App() {
+  const [profile, setProfile] = useState(null);
+  const [room, setRoom] = useState(null);
+  const [grid, setGrid] = useState(null);
+  const [myPeerId, setMyPeerId] = useState('');
+  // ... other states
+
+  useEffect(() => {
+    // Only initialize Peer if we have a profile and haven't started Peer yet
+    if (profile && !window.myPeerInstance) {
+      const peer = new window.Peer();
+      window.myPeerInstance = peer; // Store it globally to prevent double-init
+
+      peer.on('open', (id) => {
+        setMyPeerId(id);
+        if (!room?.isHost) {
+          // If we are joining, the connection is handled in SetupFlow
+        }
+      });
+
+      // CRITICAL: This is what fixes the "Dads screen stuck" issue
+      // It tells your phone: "When someone connects to me, accept them!"
+      peer.on('connection', (conn) => {
+        conn.on('open', () => {
+          setRoom({ isHost: true, conn, id: myPeerId });
+          // Optional: Send a 'Welcome' message to trigger his "Connected" screen
+          conn.send({ type: 'WELCOME' });
+        });
+
+        conn.on('data', (data) => {
+          // Handle incoming game moves from Dad here
+        });
+      });
+    }
+  }, [profile]);
+
+  // Update handlePeerData to catch the WELCOME message on Dad's side
+  const handlePeerData = (data) => {
+    if (data.type === 'WELCOME') {
+        console.log("Host acknowledged us!");
+    }
+    // ... rest of your START_GAME logic
+  };
+
+  // ... rest of your App component
+}
   // 1. Initialize PeerJS when someone chooses to Host or Join
   useEffect(() => {
     if (profile && !myPeerId) {
