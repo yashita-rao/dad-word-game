@@ -135,29 +135,26 @@ function App() {
 
             // Guest receives grid from host
             // Inside the main polling useEffect in App.tsx
-            if (freshRoom.gridData && freshRoom.hostId !== profile.id) {
-                // Check if we need to sync the grid (initial join or level change)
-                const isNewGrid = !grid || grid.masterWord !== freshRoom.gridData.masterWord;
-                
-                if (isNewGrid) {
-                    console.log("[SYNC]: Grid received from host. Starting game...");
-                    setGrid(freshRoom.gridData);
-                    
-                    // Reset local game state for the new grid
-                    if (freshRoom.mode === 'Racing') {
-                        setFoundWords([]);
-                    } else {
-                        setFoundWords(freshRoom.foundWords || []);
-                    }
-                    
-                    // Map characters to WheelLetter format
-                    const wl = freshRoom.gridData.wheelLetters.map((char: string, i: number) => ({
-                        id: `w-${i}-${char}`, 
-                        char
-                    }));
-                    setWheelLetters(wl);
-                }
-            }
+// --- IMPROVED GUEST SYNC LOGIC ---
+        if (freshRoom.gridData && (!grid || grid.masterWord !== freshRoom.gridData.masterWord)) {
+          console.log("[SYNC]: New grid detected from host. Starting game...");
+          
+          // 1. Set the board
+          setGrid(freshRoom.gridData);
+          
+          // 2. Clear old words from previous levels
+          setFoundWords(freshRoom.foundWords || []);
+          
+          // 3. Set the letters on the wheel
+          const newWheel = freshRoom.gridData.wheelLetters.map((char: string, i: number) => ({
+            id: `wheel-${i}-${char}`,
+            char: char
+          }));
+          setWheelLetters(newWheel);
+          
+          // 4. Update the local room state so the loading screen disappears
+          setRoom(freshRoom);
+        }
 
             // Collaborative Sync
             if (grid && freshRoom.mode === 'Collaborative') {

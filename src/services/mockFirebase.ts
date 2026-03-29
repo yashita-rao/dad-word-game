@@ -27,7 +27,7 @@ const PROFILE_KEY = 'dad-word-game-profile';
 // PUBLIC DISCOVERY HUB - Used to share codes globally across phones
 // This Bin ID is shared by everyone playing your specific build
 // Using a public, no-auth testing relay
-const API_URL = `https://api.jsonbin.io/v3/b/aa324074b886779dfa73`;
+const API_URL = 'https://api.npoint.io/b9de9d7a83abe8f6ee1b';
 
 export const mockFirebase = {
   getProfile: () => {
@@ -130,21 +130,13 @@ export const mockFirebase = {
   },
   // --- FIXED getRoom to use Cloud Sync ---
   getRoom: async (code: string): Promise<RoomInfo | null> => {
-    try {
-      // Always fetch fresh state from the cloud hub instead of local storage
-      const rooms = await mockFirebase._getSyncState();
-      const room = rooms[code];
-      
-      if (room) {
-        // Optional: Check if the room has expired (e.g., older than 2 hours)
-        const isExpired = room.lastUpdate && (Date.now() - room.lastUpdate > 7200000);
-        if (isExpired) return null;
-        return room;
+      try {
+        // This line tells the phone to check the internet mailbox
+        const rooms = await mockFirebase._getSyncState();
+        return rooms[code] || null;
+      } catch (e) {
+        console.error("[SYNC]: Error fetching room", e);
+        return null;
       }
-      return null;
-    } catch (e) {
-      console.error("[SYNC]: Failed to fetch room from cloud", e);
-      return null;
-    }
-  },
+    },
 };
